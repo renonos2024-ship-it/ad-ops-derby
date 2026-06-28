@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="理不尽なクライアント要求と広告媒体事故をくぐり抜けるWeb広告運用ダービー"
+    />
+    <title>【理不尽】Web広告運用ダービー</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23211f1b'/%3E%3Cpath d='M8 36h34l10-10 6 6-12 18H8z' fill='%23f1c453'/%3E%3Cpath d='M13 45h8v8h-8zm22 0h8v8h-8z' fill='%23171513'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Web広告運用シミュレーション風レースゲーム</p>
+          <h1>【理不尽】Web広告運用ダービー</h1>
+        </div>
+        <div class="scoreboard" aria-live="polite">
+          <span>案件</span>
+          <strong id="roundLabel">1 / 5</strong>
+        </div>
+      </header>
+
+      <section class="client-board" aria-labelledby="clientName">
+        <div class="client-copy">
+          <p class="board-label">CLIENT BRIEF</p>
+          <h2 id="clientName"></h2>
+          <p id="clientBrief"></p>
+        </div>
+        <dl class="brief-stats">
+          <div>
+            <dt>業種</dt>
+            <dd id="clientIndustry"></dd>
+          </div>
+          <div>
+            <dt>KPI</dt>
+            <dd id="clientKpi"></dd>
+          </div>
+          <div>
+            <dt>予算</dt>
+            <dd id="clientBudget"></dd>
+          </div>
+          <div>
+            <dt>理不尽度</dt>
+            <dd id="clientAbsurdity"></dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="race-visual" aria-label="広告運用ダービーのレース画面">
+        <div class="stadium-sky">
+          <div class="billboard">KPI 達成率杯</div>
+          <div class="screen" id="raceMessage">出走プランを選択してください</div>
+        </div>
+        <div class="track" id="track"></div>
+        <div class="finish-line" aria-hidden="true"></div>
+      </section>
+
+      <section class="selection-panel">
+        <div class="section-heading">
+          <p class="board-label">BETTING TABLE</p>
+          <h2>運用プランを選ぶ</h2>
+        </div>
+        <div class="plans-grid" id="plansGrid"></div>
+      </section>
+
+      <section class="live-panel" aria-live="polite">
+        <div>
+          <p class="board-label">LIVE INCIDENTS</p>
+          <ul id="eventLog" class="event-log"></ul>
+        </div>
+        <div id="resultPanel" class="result-panel hidden"></div>
+      </section>
+
+      <div id="cutIn" class="cut-in" aria-hidden="true">
+        <div>
+          <p id="cutInType"></p>
+          <strong id="cutInTitle"></strong>
+          <span id="cutInBody"></span>
+        </div>
+      </div>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
