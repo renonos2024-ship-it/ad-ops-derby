@@ -361,6 +361,7 @@ const els = {
   cutInType: document.querySelector("#cutInType"),
   cutInTitle: document.querySelector("#cutInTitle"),
   cutInBody: document.querySelector("#cutInBody"),
+  cutInContinue: document.querySelector("#cutInContinue"),
 };
 
 function weightedBase(plan) {
@@ -492,7 +493,7 @@ async function playIncident(item, incident) {
   addLog(`${incident.type}: ${incident.title}。${incident.body}`);
   applyIncident(item, incident);
   renderRacePositions(item);
-  await sleep(1280);
+  await waitForCutInContinue();
   hideCutIn();
 }
 
@@ -510,7 +511,7 @@ function applyIncident(item, incident) {
   });
 }
 
-function renderRacePositions(item) {
+function renderRacePositions(item, isFinal = false) {
   const maxTrack = getTrackDistance();
   const ranked = state.scores
     .map((entry, index) => ({ ...entry, index }))
@@ -518,9 +519,13 @@ function renderRacePositions(item) {
 
   ranked.forEach((entry, rank) => {
     const leaderBoost = rank === 0 ? 8 : 0;
-    const percent = clamp((entry.score / 190) * 100 + leaderBoost, 3, 100);
-    const distance = Math.round((percent / 100) * maxTrack);
+    const percent = isFinal
+      ? clamp(106 - rank * 14 + randomBetween(-2, 2), 54, 108)
+      : clamp((entry.score / 190) * 100 + leaderBoost, 3, 100);
     const horse = document.querySelector(`#horse-${entry.index}`);
+    const distance = isFinal && rank === 0
+      ? getFinishCrossDistance(horse)
+      : Math.round((percent / 100) * maxTrack);
     horse.style.transform = `translateX(${distance}px)`;
     horse.querySelector(".runner-card span").textContent =
       `${item.plans[entry.index].media} / KPI ${Math.round(entry.score)}%`;
@@ -531,9 +536,31 @@ function renderRacePositions(item) {
 }
 
 function getTrackDistance() {
-  const trackWidth = els.track.getBoundingClientRect().width;
-  const horseWidth = document.querySelector(".horse")?.getBoundingClientRect().width || 280;
-  return Math.max(60, trackWidth - horseWidth - 76);
+  const trackRect = els.track.getBoundingClientRect();
+  const finishRect = document.querySelector(".finish-line")?.getBoundingClientRect();
+  const horse = document.querySelector(".horse");
+  const horseWidth = horse?.getBoundingClientRect().width || 280;
+  const horseLeft = horse?.offsetLeft || 12;
+
+  if (finishRect) {
+    const finishX = finishRect.left - trackRect.left + finishRect.width;
+    return Math.max(60, finishX - horseLeft - horseWidth + 28);
+  }
+
+  return Math.max(60, trackRect.width - horseWidth - 32);
+}
+
+function getFinishCrossDistance(horse) {
+  const trackRect = els.track.getBoundingClientRect();
+  const finishRect = document.querySelector(".finish-line")?.getBoundingClientRect();
+  const horseWidth = horse?.getBoundingClientRect().width || 280;
+  const horseLeft = horse?.offsetLeft || 12;
+
+  if (!finishRect) {
+    return getTrackDistance();
+  }
+
+  return Math.max(60, finishRect.right - trackRect.left - horseLeft - horseWidth + 44);
 }
 
 function finishRace(item) {
@@ -553,7 +580,10 @@ function finishRace(item) {
   const pickedRank = result.findIndex((entry) => entry.index === state.selectedIndex) + 1;
   const won = winner.index === state.selectedIndex;
 
-  renderRacePositions(item);
+  result.forEach((entry) => {
+    state.scores[entry.index].score = entry.finalScore;
+  });
+  renderRacePositions(item, true);
   els.raceMessage.textContent = won
     ? "本命的中。ただし理由はだいたい後付けです。"
     : `勝ったのは ${winnerPlan.horse}。広告運用は最後まで油断できません。`;
@@ -608,6 +638,18 @@ function showCutIn(incident) {
 function hideCutIn() {
   els.cutIn.classList.remove("show");
   els.cutIn.setAttribute("aria-hidden", "true");
+}
+
+function waitForCutInContinue() {
+  return new Promise((resolve) => {
+    els.cutInContinue.disabled = false;
+    els.cutInContinue.focus();
+    els.cutInContinue.onclick = () => {
+      els.cutInContinue.disabled = true;
+      els.cutInContinue.onclick = null;
+      resolve();
+    };
+  });
 }
 
 function addLog(message) {
