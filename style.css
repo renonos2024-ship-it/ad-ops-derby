@@ -460,6 +460,7 @@ h2 {
 .cut-in.show {
   opacity: 1;
   transform: scale(1);
+  pointer-events: auto;
 }
 
 .cut-in div {
@@ -495,6 +496,25 @@ h2 {
   margin-top: 12px;
   font-weight: 800;
   line-height: 1.5;
+}
+
+.cut-in-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-top: 22px;
+  padding: 0 22px;
+  border: 2px solid #111;
+  background: #111;
+  color: var(--ink);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cut-in-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
 
 .hidden {
