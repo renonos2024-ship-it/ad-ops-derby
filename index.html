@@ -55,6 +55,20 @@
           <div class="billboard">KPI 達成率杯</div>
           <div class="screen" id="raceMessage">出走プランを選択してください</div>
         </div>
+        <div class="race-hud" aria-live="polite">
+          <div>
+            <span>進行</span>
+            <strong id="racePhase">出走前</strong>
+          </div>
+          <div>
+            <span>先頭</span>
+            <strong id="raceLeader">未確定</strong>
+          </div>
+          <div>
+            <span>最新事件</span>
+            <strong id="raceIncident">まだ平和</strong>
+          </div>
+        </div>
         <div class="track" id="track"></div>
         <div class="finish-line" aria-hidden="true"></div>
       </section>
@@ -81,6 +95,15 @@
           <strong id="cutInTitle"></strong>
           <span id="cutInBody"></span>
           <button id="cutInContinue" class="cut-in-button" type="button">続ける</button>
+        </div>
+      </div>
+
+      <div id="winnerModal" class="winner-modal" aria-hidden="true">
+        <div>
+          <p>WINNER</p>
+          <strong id="winnerName"></strong>
+          <span id="winnerSummary"></span>
+          <button id="winnerClose" class="next-button" type="button">結果を見る</button>
         </div>
       </div>
     </main>
