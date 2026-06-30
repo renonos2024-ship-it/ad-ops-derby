@@ -357,11 +357,18 @@ const els = {
   eventLog: document.querySelector("#eventLog"),
   resultPanel: document.querySelector("#resultPanel"),
   raceMessage: document.querySelector("#raceMessage"),
+  racePhase: document.querySelector("#racePhase"),
+  raceLeader: document.querySelector("#raceLeader"),
+  raceIncident: document.querySelector("#raceIncident"),
   cutIn: document.querySelector("#cutIn"),
   cutInType: document.querySelector("#cutInType"),
   cutInTitle: document.querySelector("#cutInTitle"),
   cutInBody: document.querySelector("#cutInBody"),
   cutInContinue: document.querySelector("#cutInContinue"),
+  winnerModal: document.querySelector("#winnerModal"),
+  winnerName: document.querySelector("#winnerName"),
+  winnerSummary: document.querySelector("#winnerSummary"),
+  winnerClose: document.querySelector("#winnerClose"),
 };
 
 function weightedBase(plan) {
@@ -390,8 +397,10 @@ function renderCase() {
   els.clientBudget.textContent = item.budget;
   els.clientAbsurdity.textContent = item.absurdity;
   els.raceMessage.textContent = "出走プランを選択してください";
+  updateRaceHud("出走前", "未確定", "まだ平和");
   els.eventLog.innerHTML = "";
   els.resultPanel.classList.add("hidden");
+  hideWinnerModal();
   renderPlans(item);
   renderTrack(item);
 }
@@ -451,6 +460,7 @@ function startRace(selectedIndex) {
   state.selectedIndex = selectedIndex;
   state.running = true;
   els.raceMessage.textContent = `${item.plans[selectedIndex].horse} に投票。ゲートイン完了。`;
+  updateRaceHud("ゲートイン", item.plans[selectedIndex].horse, "まだ平和");
   els.resultPanel.classList.add("hidden");
 
   [...els.plansGrid.querySelectorAll("button")].forEach((button, index) => {
@@ -464,7 +474,8 @@ function startRace(selectedIndex) {
 
 async function runRaceTimeline(item) {
   for (let tick = 1; tick <= 10; tick += 1) {
-    await sleep(620);
+    await sleep(980);
+    updateRaceHud(`第${tick}コーナー / 10`, null, null);
     advanceScores(item, tick);
     renderRacePositions(item);
 
@@ -491,6 +502,7 @@ function advanceScores(item, tick) {
 async function playIncident(item, incident) {
   showCutIn(incident);
   addLog(`${incident.type}: ${incident.title}。${incident.body}`);
+  updateRaceHud("審議中", null, incident.title);
   applyIncident(item, incident);
   renderRacePositions(item);
   await waitForCutInContinue();
@@ -532,6 +544,7 @@ function renderRacePositions(item, isFinal = false) {
   });
 
   const leader = item.plans[ranked[0].index];
+  updateRaceHud(null, `${leader.horse} / KPI ${Math.round(ranked[0].score)}%`, null);
   els.raceMessage.textContent = `現在先頭: ${leader.horse} / KPI ${Math.round(ranked[0].score)}%。まだ何も信用できません。`;
 }
 
@@ -584,6 +597,7 @@ function finishRace(item) {
     state.scores[entry.index].score = entry.finalScore;
   });
   renderRacePositions(item, true);
+  updateRaceHud("確定", `${winnerPlan.horse} / KPI ${Math.round(winner.finalScore)}%`, "レース確定");
   els.raceMessage.textContent = won
     ? "本命的中。ただし理由はだいたい後付けです。"
     : `勝ったのは ${winnerPlan.horse}。広告運用は最後まで油断できません。`;
@@ -610,6 +624,7 @@ function finishRace(item) {
   els.resultPanel.classList.remove("hidden");
   els.resultPanel.querySelector("button").addEventListener("click", nextCase);
   state.running = false;
+  showWinnerModal(winnerPlan, winner.finalScore, won);
 }
 
 function makeResultComment(item, winnerPlan, pickedPlan, pickedRank, pickedScore) {
@@ -640,6 +655,25 @@ function hideCutIn() {
   els.cutIn.setAttribute("aria-hidden", "true");
 }
 
+function updateRaceHud(phase, leader, incident) {
+  if (phase !== null) els.racePhase.textContent = phase;
+  if (leader !== null) els.raceLeader.textContent = leader;
+  if (incident !== null) els.raceIncident.textContent = incident;
+}
+
+function showWinnerModal(winnerPlan, finalScore, won) {
+  els.winnerName.textContent = winnerPlan.horse;
+  els.winnerSummary.textContent = `${winnerPlan.name} が KPI ${Math.round(finalScore)}% で優勝。${won ? "あなたの本命が勝ちました。" : "理不尽な展開を制しました。"}`;
+  els.winnerModal.classList.add("show");
+  els.winnerModal.setAttribute("aria-hidden", "false");
+  els.winnerClose.focus();
+}
+
+function hideWinnerModal() {
+  els.winnerModal.classList.remove("show");
+  els.winnerModal.setAttribute("aria-hidden", "true");
+}
+
 function waitForCutInContinue() {
   return new Promise((resolve) => {
     els.cutInContinue.disabled = false;
@@ -667,3 +701,4 @@ function sleep(ms) {
 }
 
 renderCase();
+els.winnerClose.addEventListener("click", hideWinnerModal);
